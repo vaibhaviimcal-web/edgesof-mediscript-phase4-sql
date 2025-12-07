@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Phase 4: OPD & Clinical Features SQL</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { font-family: 'Inter', sans-serif; }
+    .code-block {
+      background: #1e293b;
+      color: #e2e8f0;
+      padding: 24px;
+      border-radius: 12px;
+      overflow-x: auto;
+      font-family: 'Courier New', monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      max-height: 600px;
+    }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-green-50 to-blue-50 min-h-screen p-8">
+  <div class="max-w-6xl mx-auto">
+    <div class="bg-white rounded-2xl shadow-2xl p-10 mb-8">
+      <h1 class="text-4xl font-bold text-gray-900 mb-4">🏥 Phase 4: OPD & Clinical Features SQL</h1>
+      <p class="text-xl text-gray-600 mb-8">Complete Clinical Workflow - Consultations, Vitals, Lab Tests & Appointments</p>
+
+      <div class="bg-gradient-to-r from-green-600 to-blue-600 text-white p-8 rounded-2xl mb-8">
+        <h2 class="text-2xl font-bold mb-4">🏥 What This Migration Adds:</h2>
+        <div class="grid grid-cols-2 gap-4">
+          <div>
+            <h3 class="font-bold mb-2">Clinical Features:</h3>
+            <ul class="text-sm space-y-1">
+              <li>✓ OPD/Consultation module</li>
+              <li>✓ Vitals tracking (BP, temp, pulse, etc.)</li>
+              <li>✓ Chief complaints</li>
+              <li>✓ Clinical examination notes</li>
+              <li>✓ Diagnosis recording</li>
+            </ul>
+          </div>
+          <div>
+            <h3 class="font-bold mb-2">Lab & Appointments:</h3>
+            <ul class="text-sm space-y-1">
+              <li>✓ Lab test catalog</li>
+              <li>✓ Test ordering system</li>
+              <li>✓ Result entry & reports</li>
+              <li>✓ Appointment booking</li>
+              <li>✓ Calendar management</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="bg-orange-50 border-l-4 border-orange-500 p-6 rounded-xl mb-8">
+        <h3 class="font-bold text-orange-900 mb-2">📋 Instructions:</h3>
+        <ol class="list-decimal list-inside space-y-2 text-orange-800">
+          <li>Click "Copy SQL" button below</li>
+          <li>Go to Supabase Dashboard → SQL Editor</li>
+          <li>Click "New Query"</li>
+          <li>Paste the SQL</li>
+          <li>Click "Run"</li>
+          <li>Wait for completion (~30 seconds)</li>
+        </ol>
+      </div>
+
+      <div class="mb-8">
+        <div class="flex justify-between items-center mb-4">
+          <h2 class="text-2xl font-bold text-gray-900">Complete SQL Migration</h2>
+          <button onclick="copySQL()" id="copyBtn" class="bg-gradient-to-r from-green-500 to-blue-600 text-white px-8 py-4 rounded-xl font-bold text-lg hover:shadow-2xl transition transform hover:scale-105">
+            📋 Copy SQL
+          </button>
+        </div>
+        
+        <div class="code-block" id="sqlCode">-- EdgesOf MediScript - Phase 4: OPD & Clinical Features Migration
+-- Complete Clinical Workflow
+
+-- =====================================================
+-- OPD VISITS & CONSULTATIONS
+-- =====================================================
+
+-- OPD visits table (already exists, adding missing fields)
+ALTER TABLE opd_visits ADD COLUMN IF NOT EXISTS visit_number VARCHAR(50) UNIQUE;
+ALTER TABLE opd_visits ADD COLUMN IF NOT EXISTS visit_type VARCHAR(50) CHECK (visit_type IN ('new', 'follow_up', 'emergency', 'routine'));
+ALTER TABLE opd_visits ADD COLUMN IF NOT EXISTS chief_complaints TEXT[];
+ALTER TABLE opd_visits ADD COLUMN IF NOT EXISTS history_of_present_illness TEXT;
+ALTER TABLE opd_visits ADD COLUMN IF NOT EXISTS past_medical_history TEXT;
+ALTER TABLE opd_visits ADD COLUMN IF NOT EXISTS family_history TEXT;
+ALTER TABLE opd_visits ADD COLUMN IF NOT EXISTS social_history TEXT;
+ALTER TABLE opd_visits ADD COLUMN IF NOT EXISTS allergies TEXT[];
+ALTER TABLE opd_visits ADD COLUMN IF NOT EXISTS current_medications TEXT[];
+ALTER TABLE opd_visits ADD COLUMN IF NOT EXISTS examination_findings TEXT;
+ALTER TABLE opd_visits ADD COLUMN IF NOT EXISTS provisional_diagnosis TEXT[];
+ALTER TABLE opd_visits ADD COLUMN IF NOT EXISTS final_diagnosis TEXT[];
+ALTER TABLE opd_visits ADD COLUMN IF NOT EXISTS treatment_plan TEXT;
+ALTER TABLE opd_visits ADD COLUMN IF NOT EXISTS advice TEXT;
+ALTER TABLE opd_visits ADD COLUMN IF NOT EXISTS follow_up_date DATE;
+ALTER TABLE opd_visits ADD COLUMN IF NOT EXISTS follow_up_instructions TEXT;
+ALTER TABLE opd_visits ADD COLUMN IF NOT EXISTS referred_to VARCHAR(255);
+ALTER TABLE opd_visits ADD COLUMN IF NOT EXISTS referral_reason TEXT;
+
+-- =====================================================
+-- VITALS TRACKING
+-- =====================================================
+
+-- Vitals table (already exists, ensuring all fields)
+ALTER TABLE vitals ADD COLUMN IF NOT EXISTS temperature DECIMAL(4,1);
+ALTER TABLE vitals ADD COLUMN IF NOT EXISTS temperature_unit VARCHAR(10) DEFAULT 'F' CHECK (temperature_unit IN ('F', 'C'));
+ALTER TABLE vitals ADD COLUMN IF NOT EXISTS pulse INTEGER;
+ALTER TABLE vitals ADD COLUMN IF NOT EXISTS respiratory_rate INTEGER;
+ALTER TABLE vitals ADD COLUMN IF NOT EXISTS blood_pressure_systolic INTEGER;
+ALTER TABLE vitals ADD COLUMN IF NOT EXISTS blood_pressure_diastolic INTEGER;
+ALTER TABLE vitals ADD COLUMN IF NOT EXISTS oxygen_saturation INTEGER;
+ALTER TABLE vitals ADD COLUMN IF NOT EXISTS weight DECIMAL(5,2);
+ALTER TABLE vitals ADD COLUMN IF NOT EXISTS weight_unit VARCHAR(10) DEFAULT 'kg' CHECK (weight_unit IN ('kg', 'lbs'));
+ALTER TABLE vitals ADD COLUMN IF NOT EXISTS height DECIMAL(5,2);
+ALTER TABLE vitals ADD COLUMN IF NOT EXISTS height_unit VARCHAR(10) DEFAULT 'cm' CHECK (height_unit IN ('cm', 'ft'));
+ALTER TABLE vitals ADD COLUMN IF NOT EXISTS bmi DECIMAL(4,2);
+ALTER TABLE vitals ADD COLUMN IF NOT EXISTS blood_glucose DECIMAL(5,2);
+ALTER TABLE vitals ADD COLUMN IF NOT EXISTS blood_glucose_type VARCHAR(20) CHECK (blood_glucose_type IN ('fasting', 'random', 'post_prandial'));
+ALTER TABLE vitals ADD COLUMN IF NOT EXISTS notes TEXT;
+
+-- =====================================================
+-- LAB TESTS & ORDERS
+-- =====================================================
+
+-- Lab tests catalog (already exists, adding fields)
+ALTER TABLE lab_tests ADD COLUMN IF NOT EXISTS test_code VARCHAR(50) UNIQUE;
+ALTER TABLE lab_tests ADD COLUMN IF NOT EXISTS category VARCHAR(100);
+ALTER TABLE lab_tests ADD COLUMN IF NOT EXISTS sample_type VARCHAR(100);
+ALTER TABLE lab_tests ADD COLUMN IF NOT EXISTS preparation_instructions TEXT;
+ALTER TABLE lab_tests ADD COLUMN IF NOT EXISTS normal_range_min DECIMAL(10,2);
+ALTER TABLE lab_tests ADD COLUMN IF NOT EXISTS normal_range_max DECIMAL(10,2);
+ALTER TABLE lab_tests ADD COLUMN IF NOT EXISTS unit VARCHAR(50);
+ALTER TABLE lab_tests ADD COLUMN IF NOT EXISTS turnaround_time_hours INTEGER;
+ALTER TABLE lab_tests ADD COLUMN IF NOT EXISTS is_active BOOLEAN DEFAULT true;
+
+-- Lab orders (already exists, adding fields)
+ALTER TABLE lab_orders ADD COLUMN IF NOT EXISTS order_number VARCHAR(50) UNIQUE;
+ALTER TABLE lab_orders ADD COLUMN IF NOT EXISTS priority VARCHAR(20) DEFAULT 'routine' CHECK (priority IN ('routine', 'urgent', 'stat'));
+ALTER TABLE lab_orders ADD COLUMN IF NOT EXISTS clinical_notes TEXT;
+ALTER TABLE lab_orders ADD COLUMN IF NOT EXISTS sample_collected BOOLEAN DEFAULT false;
+ALTER TABLE lab_orders ADD COLUMN IF NOT EXISTS sample_collection_date TIMESTAMP WITH TIME ZONE;
+ALTER TABLE lab_orders ADD COLUMN IF NOT EXISTS sample_received_date TIMESTAMP WITH TIME ZONE;
+ALTER TABLE lab_orders ADD COLUMN IF NOT EXISTS report_date TIMESTAMP WITH TIME ZONE;
+ALTER TABLE lab_orders ADD COLUMN IF NOT EXISTS reported_by UUID REFERENCES users(id);
+ALTER TABLE lab_orders ADD COLUMN IF NOT EXISTS verified_by UUID REFERENCES users(id);
+ALTER TABLE lab_orders ADD COLUMN IF NOT EXISTS verification_date TIMESTAMP WITH TIME ZONE;
+
+-- Lab order items (already exists, adding fields)
+ALTER TABLE lab_order_items ADD COLUMN IF NOT EXISTS result_value VARCHAR(255);
+ALTER TABLE lab_order_items ADD COLUMN IF NOT EXISTS result_unit VARCHAR(50);
+ALTER TABLE lab_order_items ADD COLUMN IF NOT EXISTS normal_range VARCHAR(100);
+ALTER TABLE lab_order_items ADD COLUMN IF NOT EXISTS is_abnormal BOOLEAN DEFAULT false;
+ALTER TABLE lab_order_items ADD COLUMN IF NOT EXISTS interpretation TEXT;
+ALTER TABLE lab_order_items ADD COLUMN IF NOT EXISTS result_date TIMESTAMP WITH TIME ZONE;
+
+-- =====================================================
+-- APPOINTMENTS & SCHEDULING
+-- =====================================================
+
+-- Appointments (already exists, adding comprehensive fields)
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS appointment_number VARCHAR(50) UNIQUE;
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS appointment_type VARCHAR(50) CHECK (appointment_type IN ('consultation', 'follow_up', 'procedure', 'vaccination', 'checkup'));
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS duration_minutes INTEGER DEFAULT 30;
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS reason TEXT;
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS notes TEXT;
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS reminder_sent BOOLEAN DEFAULT false;
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS reminder_sent_at TIMESTAMP WITH TIME ZONE;
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS checked_in BOOLEAN DEFAULT false;
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS checked_in_at TIMESTAMP WITH TIME ZONE;
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS consultation_started BOOLEAN DEFAULT false;
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS consultation_started_at TIMESTAMP WITH TIME ZONE;
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS consultation_completed BOOLEAN DEFAULT false;
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS consultation_completed_at TIMESTAMP WITH TIME ZONE;
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS no_show BOOLEAN DEFAULT false;
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS cancellation_reason TEXT;
+ALTER TABLE appointments ADD COLUMN IF NOT EXISTS cancelled_by UUID REFERENCES users(id);
+
+-- Doctor schedule/availability
+CREATE TABLE IF NOT EXISTS doctor_schedules (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    clinic_id UUID REFERENCES clinics(id) ON DELETE CASCADE,
+    doctor_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    day_of_week INTEGER CHECK (day_of_week >= 0 AND day_of_week <= 6),
+    start_time TIME NOT NULL,
+    end_time TIME NOT NULL,
+    slot_duration_minutes INTEGER DEFAULT 30,
+    is_available BOOLEAN DEFAULT true,
+    max_appointments_per_slot INTEGER DEFAULT 1,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Doctor leaves/holidays
+CREATE TABLE IF NOT EXISTS doctor_leaves (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    doctor_id UUID REFERENCES users(id) ON DELETE CASCADE,
+    leave_type VARCHAR(50) CHECK (leave_type IN ('sick', 'vacation', 'conference', 'emergency', 'other')),
+    start_date DATE NOT NULL,
+    end_date DATE NOT NULL,
+    reason TEXT,
+    approved BOOLEAN DEFAULT false,
+    approved_by UUID REFERENCES users(id),
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- =====================================================
+-- CLINICAL TEMPLATES & NOTES
+-- =====================================================
+
+-- Clinical note templates
+CREATE TABLE IF NOT EXISTS clinical_templates (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    clinic_id UUID REFERENCES clinics(id) ON DELETE CASCADE,
+    created_by UUID REFERENCES users(id),
+    template_name VARCHAR(255) NOT NULL,
+    template_type VARCHAR(50) CHECK (template_type IN ('chief_complaint', 'examination', 'diagnosis', 'treatment_plan', 'advice')),
+    content TEXT NOT NULL,
+    is_active BOOLEAN DEFAULT true,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Patient medical history
+CREATE TABLE IF NOT EXISTS patient_medical_history (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    patient_id UUID REFERENCES patients(id) ON DELETE CASCADE,
+    condition_name VARCHAR(255) NOT NULL,
+    diagnosed_date DATE,
+    status VARCHAR(50) CHECK (status IN ('active', 'resolved', 'chronic', 'in_remission')),
+    notes TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
+    updated_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Patient allergies
+CREATE TABLE IF NOT EXISTS patient_allergies (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    patient_id UUID REFERENCES patients(id) ON DELETE CASCADE,
+    allergen VARCHAR(255) NOT NULL,
+    allergy_type VARCHAR(50) CHECK (allergy_type IN ('drug', 'food', 'environmental', 'other')),
+    severity VARCHAR(20) CHECK (severity IN ('mild', 'moderate', 'severe', 'life_threatening')),
+    reaction TEXT,
+    onset_date DATE,
+    notes TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- Patient immunizations
+CREATE TABLE IF NOT EXISTS patient_immunizations (
+    id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+    patient_id UUID REFERENCES patients(id) ON DELETE CASCADE,
+    vaccine_name VARCHAR(255) NOT NULL,
+    dose_number INTEGER,
+    administered_date DATE NOT NULL,
+    administered_by UUID REFERENCES users(id),
+    batch_number VARCHAR(100),
+    expiry_date DATE,
+    site VARCHAR(100),
+    route VARCHAR(50),
+    notes TEXT,
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
+);
+
+-- =====================================================
+-- INDEXES FOR PERFORMANCE
+-- =====================================================
+
+CREATE INDEX IF NOT EXISTS idx_opd_visits_visit_number ON opd_visits(visit_number);
+CREATE INDEX IF NOT EXISTS idx_opd_visits_patient ON opd_visits(patient_id);
+CREATE INDEX IF NOT EXISTS idx_opd_visits_doctor ON opd_visits(doctor_id);
+CREATE INDEX IF NOT EXISTS idx_opd_visits_date ON opd_visits(visit_date);
+
+CREATE INDEX IF NOT EXISTS idx_vitals_patient ON vitals(patient_id);
+CREATE INDEX IF NOT EXISTS idx_vitals_visit ON vitals(visit_id);
+CREATE INDEX IF NOT EXISTS idx_vitals_recorded ON vitals(recorded_at);
+
+CREATE INDEX IF NOT EXISTS idx_lab_orders_order_number ON lab_orders(order_number);
+CREATE INDEX IF NOT EXISTS idx_lab_orders_patient ON lab_orders(patient_id);
+CREATE INDEX IF NOT EXISTS idx_lab_orders_status ON lab_orders(status);
+
+CREATE INDEX IF NOT EXISTS idx_appointments_appointment_number ON appointments(appointment_number);
+CREATE INDEX IF NOT EXISTS idx_appointments_patient ON appointments(patient_id);
+CREATE INDEX IF NOT EXISTS idx_appointments_doctor ON appointments(doctor_id);
+CREATE INDEX IF NOT EXISTS idx_appointments_date ON appointments(appointment_date);
+CREATE INDEX IF NOT EXISTS idx_appointments_status ON appointments(status);
+
+CREATE INDEX IF NOT EXISTS idx_doctor_schedules_doctor ON doctor_schedules(doctor_id);
+CREATE INDEX IF NOT EXISTS idx_doctor_schedules_day ON doctor_schedules(day_of_week);
+
+CREATE INDEX IF NOT EXISTS idx_patient_medical_history_patient ON patient_medical_history(patient_id);
+CREATE INDEX IF NOT EXISTS idx_patient_allergies_patient ON patient_allergies(patient_id);
+CREATE INDEX IF NOT EXISTS idx_patient_immunizations_patient ON patient_immunizations(patient_id);
+
+-- =====================================================
+-- FUNCTIONS & TRIGGERS
+-- =====================================================
+
+-- Auto-generate visit number
+CREATE OR REPLACE FUNCTION generate_visit_number()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.visit_number IS NULL THEN
+        NEW.visit_number := 'V' || TO_CHAR(NOW(), 'YYYYMMDD') || '-' || LPAD(NEXTVAL('visit_number_seq')::TEXT, 4, '0');
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE SEQUENCE IF NOT EXISTS visit_number_seq;
+
+CREATE TRIGGER set_visit_number
+    BEFORE INSERT ON opd_visits
+    FOR EACH ROW
+    EXECUTE FUNCTION generate_visit_number();
+
+-- Auto-generate appointment number
+CREATE OR REPLACE FUNCTION generate_appointment_number()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.appointment_number IS NULL THEN
+        NEW.appointment_number := 'APT' || TO_CHAR(NOW(), 'YYYYMMDD') || '-' || LPAD(NEXTVAL('appointment_number_seq')::TEXT, 4, '0');
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE SEQUENCE IF NOT EXISTS appointment_number_seq;
+
+CREATE TRIGGER set_appointment_number
+    BEFORE INSERT ON appointments
+    FOR EACH ROW
+    EXECUTE FUNCTION generate_appointment_number();
+
+-- Auto-generate lab order number
+CREATE OR REPLACE FUNCTION generate_lab_order_number()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.order_number IS NULL THEN
+        NEW.order_number := 'LAB' || TO_CHAR(NOW(), 'YYYYMMDD') || '-' || LPAD(NEXTVAL('lab_order_number_seq')::TEXT, 4, '0');
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE SEQUENCE IF NOT EXISTS lab_order_number_seq;
+
+CREATE TRIGGER set_lab_order_number
+    BEFORE INSERT ON lab_orders
+    FOR EACH ROW
+    EXECUTE FUNCTION generate_lab_order_number();
+
+-- Auto-calculate BMI
+CREATE OR REPLACE FUNCTION calculate_bmi()
+RETURNS TRIGGER AS $$
+BEGIN
+    IF NEW.weight IS NOT NULL AND NEW.height IS NOT NULL THEN
+        -- Convert to metric if needed
+        DECLARE
+            weight_kg DECIMAL(5,2);
+            height_m DECIMAL(4,2);
+        BEGIN
+            weight_kg := CASE 
+                WHEN NEW.weight_unit = 'lbs' THEN NEW.weight * 0.453592
+                ELSE NEW.weight
+            END;
+            
+            height_m := CASE 
+                WHEN NEW.height_unit = 'ft' THEN NEW.height * 0.3048
+                WHEN NEW.height_unit = 'cm' THEN NEW.height / 100
+                ELSE NEW.height
+            END;
+            
+            IF height_m > 0 THEN
+                NEW.bmi := ROUND((weight_kg / (height_m * height_m))::NUMERIC, 2);
+            END IF;
+        END;
+    END IF;
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+CREATE TRIGGER calculate_bmi_trigger
+    BEFORE INSERT OR UPDATE ON vitals
+    FOR EACH ROW
+    EXECUTE FUNCTION calculate_bmi();
+
+-- =====================================================
+-- SAMPLE DATA
+-- =====================================================
+
+-- Insert sample lab tests
+INSERT INTO lab_tests (name, test_code, category, sample_type, price, normal_range_min, normal_range_max, unit, turnaround_time_hours) VALUES
+('Complete Blood Count (CBC)', 'CBC001', 'Hematology', 'Blood', 500, NULL, NULL, 'cells/mcL', 24),
+('Blood Glucose Fasting', 'GLU001', 'Biochemistry', 'Blood', 150, 70, 100, 'mg/dL', 4),
+('Lipid Profile', 'LIP001', 'Biochemistry', 'Blood', 800, NULL, NULL, 'mg/dL', 24),
+('Liver Function Test (LFT)', 'LFT001', 'Biochemistry', 'Blood', 700, NULL, NULL, 'U/L', 24),
+('Kidney Function Test (KFT)', 'KFT001', 'Biochemistry', 'Blood', 700, NULL, NULL, 'mg/dL', 24),
+('Thyroid Profile', 'THY001', 'Endocrinology', 'Blood', 900, NULL, NULL, 'mIU/L', 48),
+('HbA1c', 'HBA001', 'Biochemistry', 'Blood', 600, 4.0, 5.6, '%', 24),
+('Urine Routine', 'URI001', 'Pathology', 'Urine', 200, NULL, NULL, NULL, 4),
+('X-Ray Chest PA', 'XRC001', 'Radiology', 'Imaging', 400, NULL, NULL, NULL, 2),
+('ECG', 'ECG001', 'Cardiology', 'Procedure', 300, NULL, NULL, NULL, 1)
+ON CONFLICT (test_code) DO NOTHING;
+
+-- Insert sample clinical templates
+INSERT INTO clinical_templates (template_name, template_type, content) VALUES
+('Fever - Chief Complaint', 'chief_complaint', 'Patient presents with fever since [duration]. Associated symptoms: [symptoms]. No history of recent travel.'),
+('General Physical Examination', 'examination', 'Patient is conscious, oriented. Vitals stable. No pallor, icterus, cyanosis, clubbing, lymphadenopathy, or edema.'),
+('Upper Respiratory Tract Infection', 'diagnosis', 'Acute Upper Respiratory Tract Infection (URTI)'),
+('URTI Treatment Plan', 'treatment_plan', 'Symptomatic treatment with antipyretics and rest. Adequate hydration advised.'),
+('Follow-up Advice', 'advice', 'Follow up if symptoms persist beyond 3-5 days or worsen. Seek immediate care if difficulty breathing.')
+ON CONFLICT DO NOTHING;
+
+-- =====================================================
+-- SUCCESS MESSAGE
+-- =====================================================
+
+SELECT '✅ Phase 4 OPD & Clinical Features migration completed successfully!' as status,
+       'Clinical workflow, vitals, lab tests, and appointments are now ready' as details;</div>
+      </div>
+
+      <div class="bg-green-50 border-l-4 border-green-500 p-6 rounded-xl mt-8">
+        <h3 class="font-bold text-green-900 mb-3">✅ After Running This SQL:</h3>
+        <ul class="space-y-2 text-green-800 text-sm">
+          <li>✓ Complete OPD/Consultation workflow</li>
+          <li>✓ Vitals tracking with auto BMI calculation</li>
+          <li>✓ Chief complaints & clinical notes</li>
+          <li>✓ Lab test ordering & results</li>
+          <li>✓ Appointment booking system</li>
+          <li>✓ Doctor schedules & availability</li>
+          <li>✓ Patient medical history</li>
+          <li>✓ Allergy tracking</li>
+          <li>✓ Immunization records</li>
+          <li>✓ Clinical templates</li>
+        </ul>
+      </div>
+
+      <div class="mt-8 bg-gradient-to-r from-gray-900 to-gray-800 rounded-2xl p-10 text-white">
+        <h3 class="text-2xl font-bold mb-6">🎯 Next: Update Application</h3>
+        <p class="mb-4">After running this SQL, I'll update the application with:</p>
+        <div class="grid grid-cols-2 gap-6">
+          <div>
+            <h4 class="font-bold mb-2">Clinical Features:</h4>
+            <ul class="text-sm space-y-1">
+              <li>→ OPD consultation module</li>
+              <li>→ Vitals recording interface</li>
+              <li>→ Clinical notes editor</li>
+              <li>→ Diagnosis entry</li>
+            </ul>
+          </div>
+          <div>
+            <h4 class="font-bold mb-2">Lab & Appointments:</h4>
+            <ul class="text-sm space-y-1">
+              <li>→ Lab test ordering</li>
+              <li>→ Result entry system</li>
+              <li>→ Appointment calendar</li>
+              <li>→ Booking interface</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function copySQL() {
+      const sqlCode = document.getElementById('sqlCode').textContent;
+      navigator.clipboard.writeText(sqlCode).then(() => {
+        const btn = document.getElementById('copyBtn');
+        btn.innerHTML = '✅ Copied! Now paste in Supabase';
+        btn.className = 'bg-gradient-to-r from-green-600 to-emerald-700 text-white px-8 py-4 rounded-xl font-bold text-lg shadow-2xl';
+        
+        setTimeout(() => {
+          alert('✅ SQL Copied!\n\nNext Steps:\n1. Go to Supabase Dashboard\n2. Click SQL Editor\n3. Click New Query\n4. Paste (Ctrl+V)\n5. Click Run\n6. Tell me "Done!"');
+        }, 100);
+      });
+    }
+  </script>
+</body>
+</html>
